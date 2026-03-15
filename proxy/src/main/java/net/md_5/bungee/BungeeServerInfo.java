@@ -7,11 +7,10 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelOption;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.ArrayList;
+import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Queue;
 import lombok.Getter;
@@ -45,13 +44,13 @@ public class BungeeServerInfo implements ServerInfo
     private final String name;
     @Getter
     private final SocketAddress socketAddress;
-    private final Collection<ProxiedPlayer> players = new ArrayList<>();
+    private final Collection<ProxiedPlayer> players = new HashSet<>();
     @Getter
     private final String motd;
     @Getter
     private final boolean restricted;
     @Getter
-    private final Queue<DefinedPacket> packetQueue = new LinkedList<>();
+    private final Queue<DefinedPacket> packetQueue = new ArrayDeque<>();
 
     @Synchronized("players")
     public void addPlayer(ProxiedPlayer player)

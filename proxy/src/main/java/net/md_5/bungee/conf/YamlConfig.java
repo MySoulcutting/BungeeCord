@@ -252,8 +252,11 @@ public class YamlConfig implements ConfigurationAdapter
             SocketAddress address = Util.getAddr( host );
             Map<String, String> forced = new CaseInsensitiveMap<>( get( "forced_hosts", forcedDef, val ) );
             String tabListName = get( "tab_list", "GLOBAL_PING", val );
-            DefaultTabList value = DefaultTabList.valueOf( tabListName.toUpperCase( Locale.ROOT ) );
-            if ( value == null )
+            DefaultTabList value;
+            try
+            {
+                value = DefaultTabList.valueOf( tabListName.toUpperCase( Locale.ROOT ) );
+            } catch ( IllegalArgumentException ex )
             {
                 value = DefaultTabList.GLOBAL_PING;
             }

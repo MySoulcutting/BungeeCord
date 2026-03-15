@@ -466,6 +466,7 @@ public class BungeeCord extends ProxyServer
             Thread.sleep( 500 );
         } catch ( InterruptedException ex )
         {
+            Thread.currentThread().interrupt();
         }
 
         if ( reconnectHandler != null )
@@ -502,6 +503,7 @@ public class BungeeCord extends ProxyServer
             eventLoops.awaitTermination( Long.MAX_VALUE, TimeUnit.NANOSECONDS );
         } catch ( InterruptedException ex )
         {
+            Thread.currentThread().interrupt();
         }
 
         getLogger().info( "Thank you and goodbye" );
@@ -791,10 +793,12 @@ public class BungeeCord extends ProxyServer
         return Sets.newHashSet( Iterables.filter( getPlayers(), new Predicate<ProxiedPlayer>()
         {
 
+            private final String lowerPartialName = partialName.toLowerCase( Locale.ROOT );
+
             @Override
             public boolean apply(ProxiedPlayer input)
             {
-                return ( input == null ) ? false : input.getName().toLowerCase( Locale.ROOT ).startsWith( partialName.toLowerCase( Locale.ROOT ) );
+                return ( input == null ) ? false : input.getName().toLowerCase( Locale.ROOT ).startsWith( lowerPartialName );
             }
         } ) );
     }

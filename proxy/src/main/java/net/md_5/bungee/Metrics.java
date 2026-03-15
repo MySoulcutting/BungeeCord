@@ -82,16 +82,14 @@ public class Metrics extends TimerTask
         connection = url.openConnection();
 
         connection.setDoOutput( true );
-        final BufferedReader reader;
         final String response;
-        try ( OutputStreamWriter writer = new OutputStreamWriter( connection.getOutputStream() ) )
+        try ( OutputStreamWriter writer = new OutputStreamWriter( connection.getOutputStream() );
+              BufferedReader reader = new BufferedReader( new InputStreamReader( connection.getInputStream() ) ) )
         {
             writer.write( data.toString() );
             writer.flush();
-            reader = new BufferedReader( new InputStreamReader( connection.getInputStream() ) );
             response = reader.readLine();
         }
-        reader.close();
 
         if ( response == null || response.startsWith( "ERR" ) )
         {

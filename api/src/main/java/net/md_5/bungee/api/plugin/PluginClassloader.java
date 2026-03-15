@@ -196,6 +196,7 @@ final class PluginClassloader extends URLClassLoader
     @Override
     public void close() throws IOException
     {
+        allLoaders.remove( this );
         try
         {
             super.close();

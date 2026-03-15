@@ -13,12 +13,14 @@ import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.ArrayDeque;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import javax.crypto.SecretKey;
 import lombok.AllArgsConstructor;
@@ -104,7 +106,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
     private State thisState = State.HANDSHAKE;
     private int loginPayloadId;
     private final Map<Integer, CompletableFuture<byte[]>> requestedLoginPayloads = new HashMap<>();
-    private final Queue<CookieFuture> requestedCookies = new LinkedList<>();
+    private final Queue<CookieFuture> requestedCookies = new ArrayDeque<>();
 
     @Data
     @ToString
@@ -574,6 +576,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
                     secure = EncryptionUtil.check( loginRequest.getPublicKey(), uniqueId );
                 } catch ( GeneralSecurityException ex )
                 {
+                    bungee.getLogger().log( Level.WARNING, "Error checking secure profile for " + getName(), ex );
                 }
 
                 if ( !secure )
@@ -856,6 +859,8 @@ public class InitialHandler extends PacketHandler implements PendingConnection
         }
     }
 
+    private static final long FUTURE_TIMEOUT = 30; // seconds
+
     @Override
     public CompletableFuture<byte[]> retrieveCookie(String cookie)
     {
@@ -869,6 +874,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
         }
 
         CompletableFuture<byte[]> future = new CompletableFuture<>();
+        scheduleTimeout( future, "Cookie request for " + cookie );
         synchronized ( requestedCookies )
         {
             requestedCookies.add( new CookieFuture( cookie, future ) );
@@ -885,6 +891,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
         Preconditions.checkState( ch.getEncodeProtocol() == Protocol.LOGIN, "LoginPayloads are only supported in the login phase" );
 
         CompletableFuture<byte[]> future = new CompletableFuture<>();
+        scheduleTimeout( future, "LoginPayload request for " + channel );
         final int id;
         synchronized ( requestedLoginPayloads )
         {
@@ -894,6 +901,17 @@ public class InitialHandler extends PacketHandler implements PendingConnection
         }
         unsafe.sendPacket( new LoginPayloadRequest( id, channel, data ) );
         return future;
+    }
+
+    private void scheduleTimeout(CompletableFuture<byte[]> future, String description)
+    {
+        ch.getHandle().eventLoop().schedule( () ->
+        {
+            if ( !future.isDone() )
+            {
+                future.completeExceptionally( new TimeoutException( description + " timed out after " + FUTURE_TIMEOUT + " seconds" ) );
+            }
+        }, FUTURE_TIMEOUT, TimeUnit.SECONDS );
     }
 
     // this method is used for event execution

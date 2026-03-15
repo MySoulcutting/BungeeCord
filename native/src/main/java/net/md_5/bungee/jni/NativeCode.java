@@ -54,6 +54,7 @@ public final class NativeCode<T>
                 loaded = true;
             } catch ( Throwable t )
             {
+                System.out.println( "Could not load native library " + fullName + " from library path: " + t.getMessage() );
             }
 
             if ( !loaded )

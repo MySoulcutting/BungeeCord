@@ -18,7 +18,7 @@ import java.security.Signature;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
-import java.util.Random;
+import java.security.SecureRandom;
 import java.util.UUID;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -37,7 +37,7 @@ import net.md_5.bungee.protocol.packet.EncryptionResponse;
 public class EncryptionUtil
 {
 
-    private static final Random random = new Random();
+    private static final SecureRandom random = new SecureRandom();
     private static final Base64.Encoder MIME_ENCODER = Base64.getMimeEncoder( 76, "\n".getBytes( StandardCharsets.UTF_8 ) );
     public static final KeyPair keys;
     public static final NativeCode<BungeeCipher> nativeFactory = new NativeCode<>( "native-cipher", JavaCipher::new, NativeCipher::new );

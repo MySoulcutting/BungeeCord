@@ -13,7 +13,7 @@ import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -302,7 +302,7 @@ public final class UserConnection implements ProxiedPlayer
     {
         if ( serverJoinQueue == null )
         {
-            serverJoinQueue = new LinkedList<>( getPendingConnection().getListener().getServerPriority() );
+            serverJoinQueue = new ArrayDeque<>( getPendingConnection().getListener().getServerPriority() );
         }
 
         ServerInfo next = null;

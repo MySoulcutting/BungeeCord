@@ -11,6 +11,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,6 +24,7 @@ public final class TranslationRegistry
 {
 
     public static final TranslationRegistry INSTANCE = new TranslationRegistry();
+    private static final Logger logger = Logger.getLogger( TranslationRegistry.class.getName() );
     //
     private final List<TranslationProvider> providers = new LinkedList<>();
 
@@ -32,6 +35,7 @@ public final class TranslationRegistry
             INSTANCE.addProvider( new JsonProvider( "/assets/minecraft/lang/en_us.json" ) );
         } catch ( Exception ex )
         {
+            logger.log( Level.FINE, "Could not load translation provider: /assets/minecraft/lang/en_us.json", ex );
         }
 
         try
@@ -39,6 +43,7 @@ public final class TranslationRegistry
             INSTANCE.addProvider( new JsonProvider( "/mojang-translations/en_us.json" ) );
         } catch ( Exception ex )
         {
+            logger.log( Level.FINE, "Could not load translation provider: /mojang-translations/en_us.json", ex );
         }
 
         try
@@ -46,6 +51,7 @@ public final class TranslationRegistry
             INSTANCE.addProvider( new ResourceBundleProvider( "mojang-translations/en_US" ) );
         } catch ( Exception ex )
         {
+            logger.log( Level.FINE, "Could not load translation provider: mojang-translations/en_US", ex );
         }
     }
 
