@@ -466,7 +466,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
         // Check maintenance mode
         if ( bungee.config.isMaintenanceMode() )
         {
-            disconnect( bungee.config.getMaintenanceMotd() );
+            disconnect( ChatColor.translateAlternateColorCodes( '&', bungee.config.getMaintenanceMotd() ) );
             return;
         }
 

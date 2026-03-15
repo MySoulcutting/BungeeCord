@@ -399,7 +399,7 @@ public class DownstreamBridge extends PacketHandler
                     switch ( target )
                     {
                         case "ALL":
-                            for ( ServerInfo server : bungee.getServers().values() )
+                            for ( ServerInfo server : new java.util.ArrayList<>( bungee.getServers().values() ) )
                             {
                                 if ( server != this.server.getInfo() )
                                 {
@@ -408,7 +408,7 @@ public class DownstreamBridge extends PacketHandler
                             }
                             break;
                         case "ONLINE":
-                            for ( ServerInfo server : bungee.getServers().values() )
+                            for ( ServerInfo server : new java.util.ArrayList<>( bungee.getServers().values() ) )
                             {
                                 if ( server != this.server.getInfo() )
                                 {
@@ -542,7 +542,7 @@ public class DownstreamBridge extends PacketHandler
                 case "GetServers":
                 {
                     out.writeUTF( "GetServers" );
-                    out.writeUTF( Util.csv( bungee.getServers().keySet() ) );
+                    out.writeUTF( Util.csv( new java.util.ArrayList<>( bungee.getServers().keySet() ) ) );
                     break;
                 }
                 case "Message":

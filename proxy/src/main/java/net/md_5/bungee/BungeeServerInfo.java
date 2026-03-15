@@ -71,6 +71,14 @@ public class BungeeServerInfo implements ServerInfo
         return Collections.unmodifiableCollection( new HashSet<>( players ) );
     }
 
+    public int getPlayerCount()
+    {
+        synchronized ( players )
+        {
+            return players.size();
+        }
+    }
+
     @Override
     public String getPermission()
     {

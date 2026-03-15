@@ -2,6 +2,7 @@ package net.md_5.bungee.balancer;
 
 import java.util.List;
 import java.util.Objects;
+import net.md_5.bungee.BungeeServerInfo;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.config.LoadBalancer;
 import net.md_5.bungee.api.config.ServerInfo;
@@ -23,7 +24,9 @@ public class LowestPlayerBalancer implements LoadBalancer
             ServerInfo candidate = ProxyServer.getInstance().getServerInfo( name );
             if ( candidate != null && !Objects.equals( currentServer, candidate ) )
             {
-                int count = candidate.getPlayers().size();
+                int count = ( candidate instanceof BungeeServerInfo )
+                        ? ( (BungeeServerInfo) candidate ).getPlayerCount()
+                        : candidate.getPlayers().size();
                 if ( count < lowestCount )
                 {
                     lowestCount = count;
