@@ -13,7 +13,6 @@ import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -115,9 +114,8 @@ public final class UserConnection implements ProxiedPlayer
     private int gamemode;
     @Getter
     private int compressionThreshold = -1;
-    // Used for trying multiple servers in order
-    @Setter
-    private Queue<String> serverJoinQueue;
+    @Getter
+    private final long loginTime = System.currentTimeMillis();
     @Getter
     @Setter
     private boolean bundling;
@@ -300,23 +298,8 @@ public final class UserConnection implements ProxiedPlayer
 
     public ServerInfo updateAndGetNextServer(ServerInfo currentTarget)
     {
-        if ( serverJoinQueue == null )
-        {
-            serverJoinQueue = new ArrayDeque<>( getPendingConnection().getListener().getServerPriority() );
-        }
-
-        ServerInfo next = null;
-        while ( !serverJoinQueue.isEmpty() )
-        {
-            ServerInfo candidate = ProxyServer.getInstance().getServerInfo( serverJoinQueue.remove() );
-            if ( !Objects.equals( currentTarget, candidate ) )
-            {
-                next = candidate;
-                break;
-            }
-        }
-
-        return next;
+        return BungeeCord.getInstance().getLoadBalancer().select(
+                getPendingConnection().getListener().getServerPriority(), currentTarget );
     }
 
     public void connect(ServerInfo info, final Callback<Boolean> callback, final boolean retry)

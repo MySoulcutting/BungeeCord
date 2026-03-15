@@ -401,7 +401,6 @@ public class ServerConnector extends PacketHandler
         // TODO: Move this to the connected() method of DownstreamBridge
         target.addPlayer( user );
         user.getPendingConnects().remove( target );
-        user.setServerJoinQueue( null );
         user.setDimensionChange( false );
 
         ServerInfo from = ( user.getServer() == null ) ? null : user.getServer().getInfo();

@@ -244,7 +244,7 @@ public abstract class DefinedPacket
     public static int[] readVarIntArray(ByteBuf buf)
     {
         int len = readVarInt( buf );
-        if ( len > Short.MAX_VALUE )
+        if ( len < 0 || len > Short.MAX_VALUE )
         {
             throw new OverflowPacketException( "Cannot receive VarInt array longer than " + Short.MAX_VALUE + " (got " + len + " entries)" );
         }
@@ -270,7 +270,7 @@ public abstract class DefinedPacket
     public static List<String> readStringArray(ByteBuf buf)
     {
         int len = readVarInt( buf );
-        if ( len > Short.MAX_VALUE )
+        if ( len < 0 || len > Short.MAX_VALUE )
         {
             throw new OverflowPacketException( "Cannot receive String array longer than " + Short.MAX_VALUE + " (got " + len + " entries)" );
         }
@@ -424,7 +424,7 @@ public abstract class DefinedPacket
     public static Property[] readProperties(ByteBuf buf)
     {
         int len = DefinedPacket.readVarInt( buf );
-        if ( len > 1024 )
+        if ( len < 0 || len > 1024 )
         {
             throw new OverflowPacketException( "Cannot receive Property array longer than 1024 (got " + len + " entries)" );
         }

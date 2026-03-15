@@ -3,6 +3,7 @@ package net.md_5.bungee.api.config;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
 import net.md_5.bungee.api.Callback;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ServerPing;
@@ -115,4 +116,26 @@ public interface ServerInfo
      * @param callback the callback to call when the count has been retrieved.
      */
     void ping(Callback<ServerPing> callback);
+
+    /**
+     * Asynchronously gets the current server ping information.
+     *
+     * @return a {@link CompletableFuture} that will be completed with the
+     * {@link ServerPing} result, or completed exceptionally on failure
+     */
+    default CompletableFuture<ServerPing> pingAsync()
+    {
+        CompletableFuture<ServerPing> future = new CompletableFuture<>();
+        ping( (result, error) ->
+        {
+            if ( error != null )
+            {
+                future.completeExceptionally( error );
+            } else
+            {
+                future.complete( result );
+            }
+        } );
+        return future;
+    }
 }

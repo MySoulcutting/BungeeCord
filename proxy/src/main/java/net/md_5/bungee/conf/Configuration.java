@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -62,6 +63,8 @@ public class Configuration implements ProxyConfig
     private int remotePingTimeout = 5000;
     private int throttle = 4000;
     private int throttleLimit = 3;
+    private int throttleCidrLimit = -1;
+    private int throttleCidrSize = 24;
     private boolean ipForward;
     private Favicon favicon;
     private int compressionThreshold = 256;
@@ -70,6 +73,11 @@ public class Configuration implements ProxyConfig
     private boolean rejectTransfers;
     private int maxPacketsPerSecond = 1 << 12;
     private int maxPacketDataPerSecond = 1 << 25;
+    @Getter
+    @lombok.Setter
+    private boolean maintenanceMode;
+    private String maintenanceMotd = "&c&lMaintenance";
+    private String loadBalanceStrategy = "FIRST";
 
     public void load()
     {
@@ -101,6 +109,8 @@ public class Configuration implements ProxyConfig
         remotePingTimeout = adapter.getInt( "remote_ping_timeout", remotePingTimeout );
         throttle = adapter.getInt( "connection_throttle", throttle );
         throttleLimit = adapter.getInt( "connection_throttle_limit", throttleLimit );
+        throttleCidrLimit = adapter.getInt( "connection_throttle_cidr_limit", throttleCidrLimit );
+        throttleCidrSize = adapter.getInt( "connection_throttle_cidr_size", throttleCidrSize );
         ipForward = adapter.getBoolean( "ip_forward", ipForward );
         compressionThreshold = adapter.getInt( "network_compression_threshold", compressionThreshold );
         preventProxyConnections = adapter.getBoolean( "prevent_proxy_connections", preventProxyConnections );
@@ -108,6 +118,9 @@ public class Configuration implements ProxyConfig
         rejectTransfers = adapter.getBoolean( "reject_transfers", rejectTransfers );
         maxPacketsPerSecond = adapter.getInt( "max_packets_per_second", maxPacketsPerSecond );
         maxPacketDataPerSecond = adapter.getInt( "max_packets_data_per_second", maxPacketDataPerSecond );
+        maintenanceMode = adapter.getBoolean( "maintenance_mode", maintenanceMode );
+        maintenanceMotd = adapter.getString( "maintenance_motd", maintenanceMotd );
+        loadBalanceStrategy = adapter.getString( "load_balance_strategy", loadBalanceStrategy );
 
         disabledCommands = new CaseInsensitiveSet( (Collection<String>) adapter.getList( "disabled_commands", Arrays.asList( "disabledcommandhere" ) ) );
 
@@ -118,7 +131,7 @@ public class Configuration implements ProxyConfig
 
         if ( servers == null )
         {
-            servers = new CaseInsensitiveMap<>( newServers );
+            servers = Collections.synchronizedMap( new CaseInsensitiveMap<>( newServers ) );
         } else
         {
             for ( ServerInfo oldServer : servers.values() )

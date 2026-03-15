@@ -367,6 +367,12 @@ public class InitialHandler extends PacketHandler implements PendingConnection
             handshake.setHost( handshake.getHost().substring( 0, handshake.getHost().length() - 1 ) );
         }
 
+        // Validate hostname length and characters
+        if ( handshake.getHost().length() > 255 )
+        {
+            throw new QuietException( "Hostname too long: " + handshake.getHost().length() );
+        }
+
         this.virtualHost = InetSocketAddress.createUnresolved( handshake.getHost(), handshake.getPort() );
 
         bungee.getPluginManager().callEvent( new PlayerHandshakeEvent( InitialHandler.this, handshake ) );
@@ -456,6 +462,13 @@ public class InitialHandler extends PacketHandler implements PendingConnection
         }
 
         this.loginRequest = loginRequest;
+
+        // Check maintenance mode
+        if ( bungee.config.isMaintenanceMode() )
+        {
+            disconnect( bungee.config.getMaintenanceMotd() );
+            return;
+        }
 
         int limit = BungeeCord.getInstance().config.getPlayerLimit();
         if ( limit > 0 && bungee.getOnlineCount() >= limit )

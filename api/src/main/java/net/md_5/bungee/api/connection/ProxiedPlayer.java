@@ -146,6 +146,44 @@ public interface ProxiedPlayer extends Connection, CommandSender
 
     /**
      * Connects / transfers this user to the specified connection, gracefully
+     * closing the current one.
+     *
+     * @param target the new server to connect to
+     * @return a {@link CompletableFuture} that will be completed with
+     * {@code true} on success, or {@code false} on failure
+     */
+    default CompletableFuture<Boolean> connectAsync(ServerInfo target)
+    {
+        return connectAsync( target, ServerConnectEvent.Reason.PLUGIN );
+    }
+
+    /**
+     * Connects / transfers this user to the specified connection, gracefully
+     * closing the current one.
+     *
+     * @param target the new server to connect to
+     * @param reason the reason for connecting to the new server
+     * @return a {@link CompletableFuture} that will be completed with
+     * {@code true} on success, or {@code false} on failure
+     */
+    default CompletableFuture<Boolean> connectAsync(ServerInfo target, ServerConnectEvent.Reason reason)
+    {
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
+        connect( target, (result, error) ->
+        {
+            if ( error != null )
+            {
+                future.completeExceptionally( error );
+            } else
+            {
+                future.complete( result );
+            }
+        }, reason );
+        return future;
+    }
+
+    /**
+     * Connects / transfers this user to the specified connection, gracefully
      * closing the current one. Depending on the implementation, this method
      * might return before the user has been connected.
      *
@@ -425,4 +463,11 @@ public interface ProxiedPlayer extends Connection, CommandSender
      * 1.21
      */
     void sendServerLinks(List<ServerLink> serverLinks);
+
+    /**
+     * Gets the time in milliseconds when this player logged in to the proxy.
+     *
+     * @return the login timestamp in milliseconds (epoch time)
+     */
+    long getLoginTime();
 }

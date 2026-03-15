@@ -63,6 +63,7 @@ import net.md_5.bungee.api.plugin.PluginManager;
 import net.md_5.bungee.command.CommandBungee;
 import net.md_5.bungee.command.CommandEnd;
 import net.md_5.bungee.command.CommandIP;
+import net.md_5.bungee.command.CommandMaintenance;
 import net.md_5.bungee.command.CommandPerms;
 import net.md_5.bungee.command.CommandReload;
 import net.md_5.bungee.command.ConsoleCommandCompleter;
@@ -154,6 +155,8 @@ public class BungeeCord extends ProxyServer
     private final Logger logger;
     @Getter
     private ConnectionThrottle connectionThrottle;
+    @Getter
+    private net.md_5.bungee.api.config.LoadBalancer loadBalancer;
     private final ModuleManager moduleManager = new ModuleManager();
 
     {
@@ -230,6 +233,7 @@ public class BungeeCord extends ProxyServer
         getPluginManager().registerCommand( null, new CommandIP() );
         getPluginManager().registerCommand( null, new CommandBungee() );
         getPluginManager().registerCommand( null, new CommandPerms() );
+        getPluginManager().registerCommand( null, new CommandMaintenance() );
 
         if ( !Boolean.getBoolean( "net.md_5.bungee.native.disable" ) )
         {
@@ -304,8 +308,9 @@ public class BungeeCord extends ProxyServer
 
         if ( config.getThrottle() > 0 )
         {
-            connectionThrottle = new ConnectionThrottle( config.getThrottle(), config.getThrottleLimit() );
+            connectionThrottle = new ConnectionThrottle( config.getThrottle(), config.getThrottleLimit(), config.getThrottleCidrLimit(), config.getThrottleCidrSize() );
         }
+        loadBalancer = net.md_5.bungee.balancer.LoadBalancerFactory.create( config.getLoadBalanceStrategy() );
         startListeners();
 
         saveThread.scheduleAtFixedRate( new TimerTask()
@@ -642,6 +647,32 @@ public class BungeeCord extends ProxyServer
     public Map<String, ServerInfo> getServers()
     {
         return config.getServers();
+    }
+
+    @Override
+    public ServerInfo addServer(ServerInfo server)
+    {
+        Preconditions.checkNotNull( server, "server" );
+
+        ServerInfo existing = config.getServers().putIfAbsent( server.getName(), server );
+        if ( existing == null )
+        {
+            getPluginManager().callEvent( new net.md_5.bungee.api.event.ServerAddEvent( server ) );
+        }
+        return existing;
+    }
+
+    @Override
+    public ServerInfo removeServer(String name)
+    {
+        Preconditions.checkNotNull( name, "name" );
+
+        ServerInfo removed = config.getServers().remove( name );
+        if ( removed != null )
+        {
+            getPluginManager().callEvent( new net.md_5.bungee.api.event.ServerRemoveEvent( removed ) );
+        }
+        return removed;
     }
 
     @Override

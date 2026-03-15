@@ -101,6 +101,23 @@ public abstract class ProxyServer
     public abstract Map<String, ServerInfo> getServers();
 
     /**
+     * Register a new server to this proxy. If a server with the same name
+     * already exists, it will not be replaced.
+     *
+     * @param server the server to add
+     * @return the previously registered server with the same name, or null
+     */
+    public abstract ServerInfo addServer(ServerInfo server);
+
+    /**
+     * Unregister a server from this proxy.
+     *
+     * @param name the name of the server to remove
+     * @return the removed server info, or null if not found
+     */
+    public abstract ServerInfo removeServer(String name);
+
+    /**
      * Gets the server info of a server.
      *
      * @param name the name of the configured server
